@@ -69,68 +69,7 @@ const GalleryStats = ({
         </div>
 
         {/* Advanced Stats for Face Matching Results */}
-        {showAdvancedStats && stats && confidenceGroups && (
-          <>
-            <div className="border-t pt-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Target className="h-4 w-4 text-primary" />
-                <span className="font-medium text-sm">Match Quality</span>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Average Confidence:</span>
-                  <span className={`font-semibold ${formatConfidenceColor(stats.averageConfidence)}`}>
-                    {stats.averageConfidence}%
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="text-center p-2 bg-green-50 dark:bg-green-950/20 rounded">
-                    <div className="font-medium text-green-700 dark:text-green-400">
-                      {confidenceGroups.high.length}
-                    </div>
-                    <div className="text-green-600 dark:text-green-500">High (80%+)</div>
-                  </div>
-                  
-                  <div className="text-center p-2 bg-yellow-50 dark:bg-yellow-950/20 rounded">
-                    <div className="font-medium text-yellow-700 dark:text-yellow-400">
-                      {confidenceGroups.medium.length}
-                    </div>
-                    <div className="text-yellow-600 dark:text-yellow-500">Med (60-79%)</div>
-                  </div>
-                  
-                  <div className="text-center p-2 bg-red-50 dark:bg-red-950/20 rounded">
-                    <div className="font-medium text-red-700 dark:text-red-400">
-                      {confidenceGroups.low.length}
-                    </div>
-                    <div className="text-red-600 dark:text-red-500">Low (&lt;60%)</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Performance Indicator */}
-            <div className="border-t pt-3">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                <span className="font-medium text-sm">Search Performance</span>
-              </div>
-              
-              <div className="text-xs space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Processing:</span>
-                  <span className="text-green-600">✓ Client-optimized</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Load Time:</span>
-                  <span className="text-blue-600">Ultra-fast</span>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
+        
         {/* Selection Progress */}
         {selectedCount > 0 && (
           <div className="border-t pt-3">

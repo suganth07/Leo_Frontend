@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Grid3X3, CheckSquare, XCircle, Download, X, Image, Maximize2, Square, Target, Users } from "lucide-react";
+import AdminSearchBar from "./AdminSearchBar";
 
 interface ImageGalleryProps {
   selectedPortfolioId: string;
@@ -22,6 +23,7 @@ interface ImageGalleryProps {
   setDisplayImages: (images: { id: string; name: string; url: string }[]) => void;
   isLoadingImages?: boolean;
   loadingProgress?: { loaded: number; total?: number };
+  onFilteredResults: (filteredImages: any[]) => void;
 }
 
 export default function ImageGallery({
@@ -41,6 +43,7 @@ export default function ImageGallery({
   setDisplayImages,
   isLoadingImages = false,
   loadingProgress = { loaded: 0 },
+  onFilteredResults,
 }: ImageGalleryProps) {
   if (!selectedPortfolioId) {
     return null;
@@ -115,40 +118,13 @@ export default function ImageGallery({
 
   return (
     <div className="space-y-6">
-      {/* Search Bar */}
-      <Card className="border border-border/60">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5 text-primary" />
-            Search Images
-          </CardTitle>
-          <CardDescription>
-            Search and filter images in the selected portfolio
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Search by image name..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            {searchTerm && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSearchTerm('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Enhanced Search Bar */}
+      <AdminSearchBar
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        images={displayImages.length > 0 ? displayImages : allImages}
+        onFilteredResults={onFilteredResults}
+      />
 
       {/* Show All Images Button - Only show when face matching has been performed */}
       {shouldShowDualView && (
@@ -192,13 +168,16 @@ export default function ImageGallery({
           {/* Matched Images Section */}
           <Card className="border border-green-500/30 bg-green-50/5">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  <span className="text-green-600 dark:text-green-400 font-medium">Face Match Results</span>
-                  <span className="text-sm text-muted-foreground">({filteredMatchedImages.length})</span>
+              <CardTitle className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <span className="text-green-600 dark:text-green-400 font-medium">Face Match Results</span>
+                    <span className="text-sm text-muted-foreground">({filteredMatchedImages.length})</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
+                {/* Mobile-friendly button layout */}
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -208,7 +187,7 @@ export default function ImageGallery({
                       filteredMatchedImages.forEach(img => currentSelected.add(img.id));
                       setSelectedImages(currentSelected);
                     }}
-                    className="text-xs"
+                    className="text-xs w-full sm:w-auto"
                   >
                     <CheckSquare className="w-3 h-3 mr-1" />
                     Select All Matched
@@ -222,9 +201,9 @@ export default function ImageGallery({
                       filteredMatchedImages.forEach(img => currentSelected.delete(img.id));
                       setSelectedImages(currentSelected);
                     }}
-                    className="text-xs text-red-400"
+                    className="text-xs text-red-600 border-red-200 hover:bg-red-50 w-full sm:w-auto"
                   >
-                    <XCircle className="w-3 h-3 mr-1 text-red-400" />
+                    <XCircle className="w-3 h-3 mr-1" />
                     Clear Matched
                   </Button>
                 </div>
@@ -249,13 +228,16 @@ export default function ImageGallery({
           {/* All Images Section */}
           <Card className="border border-border/60">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary" />
-                  <span>Complete Portfolio</span>
-                  <span className="text-sm text-muted-foreground">({filteredAllImages.length})</span>
+              <CardTitle className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span>Complete Portfolio</span>
+                    <span className="text-sm text-muted-foreground">({filteredAllImages.length})</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
+                {/* Mobile-friendly button layout */}
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -265,7 +247,7 @@ export default function ImageGallery({
                       filteredAllImages.forEach(img => currentSelected.add(img.id));
                       setSelectedImages(currentSelected);
                     }}
-                    className="text-xs"
+                    className="text-xs w-full sm:w-auto"
                   >
                     <CheckSquare className="w-3 h-3 mr-1" />
                     Select All Portfolio
@@ -279,9 +261,9 @@ export default function ImageGallery({
                       filteredAllImages.forEach(img => currentSelected.delete(img.id));
                       setSelectedImages(currentSelected);
                     }}
-                    className="text-xs text-red-400"
+                    className="text-xs text-red-600 border-red-200 hover:bg-red-50 w-full sm:w-auto"
                   >
-                    <XCircle className="w-3 h-3 mr-1 text-red-400" />
+                    <XCircle className="w-3 h-3 mr-1" />
                     Clear Portfolio
                   </Button>
                 </div>

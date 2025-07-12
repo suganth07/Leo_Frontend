@@ -6,18 +6,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, CheckCircle2, Search, ChevronDown } from "lucide-react";
+import { FolderOpen, CheckCircle2, Search, ChevronDown, Loader2 } from "lucide-react";
 
 interface PortfolioSelectionProps {
   folders: { id: string; name: string }[];
   selectedFolderId: string;
   onFolderChange: (value: string) => void;
+  isLoading?: boolean;
 }
 
 const PortfolioSelection = ({ 
   folders, 
   selectedFolderId, 
-  onFolderChange 
+  onFolderChange,
+  isLoading = false
 }: PortfolioSelectionProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -73,9 +75,19 @@ const PortfolioSelection = ({
                 variant="outline"
                 className="w-full justify-between h-9 text-xs"
                 onClick={() => setIsOpen(!isOpen)}
+                disabled={isLoading}
               >
-                <span className="truncate">
-                  {selectedFolder ? selectedFolder.name : "Choose portfolio..."}
+                <span className="truncate flex items-center gap-2">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Loading portfolios...
+                    </>
+                  ) : selectedFolder ? (
+                    selectedFolder.name
+                  ) : (
+                    "Choose portfolio..."
+                  )}
                 </span>
                 <ChevronDown className={`ml-2 h-3 w-3 shrink-0 opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
               </Button>

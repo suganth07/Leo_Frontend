@@ -22,6 +22,7 @@ import ImageGallery from "./components/ImageGallery";
 import LightboxModal from "./components/LightboxModal";
 import Footer from "./components/Footer";
 import StatusIndicator from "./components/StatusIndicator";
+import SelectedImageDisplay from "./components/SelectedImageDisplay";
 
 // Google Drive integration
 import { useDriveData } from "@/lib/hooks/useDriveData";
@@ -396,29 +397,80 @@ export default function ClientPage() {
     
     try {
       setDownloadLoading(true);
+      let successCount = 0;
+      const totalCount = imagesToProcess.size;
       
-      for (const fileId of imagesToProcess) {
-        const metadataRes = await fetch(`${BASE_URL}/api/file-metadata?file_id=${fileId}`);
-        if (!metadataRes.ok) throw new Error(`Failed to fetch metadata for ${fileId}`);
-        const { name } = await metadataRes.json();
-
-        const fileRes = await fetch(`${BASE_URL}/api/file-download?file_id=${fileId}`);
-        if (!fileRes.ok) throw new Error(`Failed to download file ${fileId}`);
-        const blob = await fileRes.blob();
-
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", name || `${fileId}.jpg`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+      // Show progress for multiple downloads
+      if (totalCount > 1) {
+        toast.loading(`Preparing ${totalCount} downloads...`, { id: 'download-progress' });
       }
       
-      toast.success("Download complete!");
+      for (const fileId of imagesToProcess) {
+        try {
+          // Get metadata and file data from backend
+          const [metadataRes, fileRes] = await Promise.all([
+            fetch(`${BASE_URL}/api/file-metadata?file_id=${fileId}`),
+            fetch(`${BASE_URL}/api/file-download?file_id=${fileId}`)
+          ]);
+          
+          if (!metadataRes.ok || !fileRes.ok) {
+            throw new Error(`Failed to fetch data for image`);
+          }
+          
+          const { name } = await metadataRes.json();
+          const blob = await fileRes.blob();
+          
+          // Create download without opening any external pages
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = name || `image_${fileId}.jpg`;
+          link.style.display = "none";
+          
+          // Trigger download silently
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Clean up blob URL to free memory
+          window.URL.revokeObjectURL(url);
+          successCount++;
+          
+          // Update progress for multiple downloads
+          if (totalCount > 1) {
+            toast.loading(`Downloaded ${successCount} of ${totalCount} images...`, { 
+              id: 'download-progress' 
+            });
+          }
+          
+          // Small delay between downloads to prevent browser blocking
+          if (successCount < totalCount) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+          }
+          
+        } catch (error) {
+          console.error(`Error downloading file ${fileId}:`, error);
+          const imageName = allImages.find(img => img.id === fileId)?.name || 'Unknown image';
+          toast.error(`Failed to download: ${imageName.slice(0, 30)}...`);
+        }
+      }
+      
+      // Dismiss progress toast
+      toast.dismiss('download-progress');
+      
+      // Show final result
+      if (successCount === totalCount) {
+        toast.success(`✅ Successfully downloaded ${successCount} image${totalCount > 1 ? 's' : ''}!`);
+      } else if (successCount > 0) {
+        toast.warning(`⚠️ Downloaded ${successCount} of ${totalCount} images. Some failed.`);
+      } else {
+        toast.error("❌ All downloads failed. Please try again.");
+      }
+      
     } catch (error) {
-      console.error("Error downloading files:", error);
-      toast.error("Download failed.");
+      console.error("Error in download process:", error);
+      toast.dismiss('download-progress');
+      toast.error("Download process failed.");
     } finally {
       setDownloadLoading(false);
     }
@@ -479,6 +531,7 @@ export default function ClientPage() {
                 folders={folders}
                 selectedFolderId={selectedFolderId}
                 onFolderChange={handleFolderChange}
+                isLoading={isLoadingFolders}
               />
 
               {/* Password Verification Card */}
@@ -511,59 +564,60 @@ export default function ClientPage() {
                 </div> */}
                 
                 {/* Action Buttons Row */}
-                <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {/* Upload Button */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-muted-foreground"></label>
-                    <div className="relative">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setFile(e.target.files?.[0] || null)}
-                        className="hidden"
-                        id="file-upload"
-                      />
-                      <label
-                        htmlFor="file-upload"
-                        className="w-full h-10 px-3 border border-border rounded-md bg-background hover:bg-accent cursor-pointer flex items-center justify-center text-sm font-medium transition-colors"
+                <div className="lg:col-span-8 space-y-3">
+                  {/* First Row: Upload, Find Photos, Select All */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {/* Upload Button */}
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setFile(e.target.files?.[0] || null)}
+                          className="hidden"
+                          id="file-upload"
+                        />
+                        <label
+                          htmlFor="file-upload"
+                          className="w-full h-12 px-3 border border-border rounded-md bg-card hover:bg-accent cursor-pointer flex items-center justify-center text-sm font-medium transition-colors"
+                        >
+                          {file ? file.name.slice(0, 8) + '...' : 'Choose Image'}
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Find Photos Button */}
+                    <div className="space-y-2">
+                      <button
+                        onClick={handleAIMatch}
+                        disabled={!file || loading || matchLoading}
+                        className="w-full h-12 px-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm font-medium transition-colors"
                       >
-                        {file ? file.name.slice(0, 8) + '...' : 'Choose Image'}
-                      </label>
+                        {matchLoading ? 'Searching...' : 'Find Similar'}
+                      </button>
+                    </div>
+
+                    {/* Select All Button */}
+                    <div className="space-y-2">
+                      <button
+                        onClick={handleSelectAll}
+                        className="w-full h-12 px-3 border border-border rounded-md bg-card hover:bg-accent text-sm font-medium transition-colors"
+                      >
+                        Select All
+                      </button>
                     </div>
                   </div>
-
-                  {/* Find Photos Button */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-muted-foreground"></label>
-                    <button
-                      onClick={handleAIMatch}
-                      disabled={!file || loading || matchLoading}
-                      className="w-full h-10 px-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm font-medium transition-colors"
-                    >
-                      {matchLoading ? 'Searching...' : 'Find Photos'}
-                    </button>
-                  </div>
-
-                  {/* Select All Button */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-muted-foreground"></label>
-                    <button
-                      onClick={handleSelectAll}
-                      className="w-full h-10 px-3 border border-border rounded-md bg-background hover:bg-accent text-sm font-medium transition-colors"
-                    >
-                      Select All
-                    </button>
-                  </div>
-
-                  {/* Clear All Button */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-muted-foreground"></label>
-                    <button
-                      onClick={handleClearAll}
-                      className="w-full h-10 px-3 border border-border rounded-md bg-background hover:bg-accent text-sm font-medium transition-colors"
-                    >
-                      Clear All
-                    </button>
+                  
+                  {/* Second Row: Clear All Button (Mobile Friendly) */}
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="space-y-2">
+                      <button
+                        onClick={handleClearAll}
+                        className="w-full h-12 px-3 border border-destructive/20 rounded-md bg-destructive/5 hover:bg-destructive/10 text-sm font-medium transition-colors text-destructive"
+                      >
+                        Clear All Selections
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -580,8 +634,14 @@ export default function ClientPage() {
                   />
                 </div>
 
+                {/* Selected Image Display */}
+                <SelectedImageDisplay 
+                  file={file}
+                  onClearFile={() => setFile(null)}
+                />
+
                 {/* Search Bar - Centered */}
-                <div className="lg:col-span-6">
+                <div className={`${file ? 'lg:col-span-3' : 'lg:col-span-6'}`}>
                   <SearchBar 
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}

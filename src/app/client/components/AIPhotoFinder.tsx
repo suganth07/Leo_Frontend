@@ -199,12 +199,12 @@ const AIPhotoFinder = ({
                   ) : (
                     <Upload className="w-5 h-5 group-hover:text-primary transition-colors" />
                   )}
-                  <div className="text-xs font-medium text-center">
-                    {processingImage ? 'Processing...' : 'Upload Photo'}
+                  <div className="text-xs font-bold text-center text-primary">
+                    {processingImage ? 'Processing...' : 'Choose Image'}
                   </div>
                   {!processedFile && (
                     <div className="text-xs text-muted-foreground text-center">
-                      JPEG, PNG, WebP (max 10MB)
+                      Upload your photo here
                     </div>
                   )}
                 </div>
@@ -235,16 +235,16 @@ const AIPhotoFinder = ({
             {/* AI Search Button */}
             <Button
               variant="outline"
-              className="h-[90px] flex flex-col items-center justify-center gap-1.5 hover:border-primary/50 transition-colors disabled:opacity-50"
+              className="h-[90px] flex flex-col items-center justify-center gap-1.5 hover:border-primary/50 hover:bg-primary/5 transition-colors disabled:opacity-50"
               onClick={onMatch}
               disabled={matchLoading || !processedFile || processingImage || !selectedFolderId || !isPasswordVerified}
             >
               {matchLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
               ) : (
-                <Search className="w-5 h-5" />
+                <Search className="w-5 h-5 text-primary" />
               )}
-              <div className="text-xs font-medium text-center">
+              <div className="text-xs font-bold text-center text-primary">
                 {matchLoading ? "Searching..." : "Find Photos"}
               </div>
               {!processedFile ? (
@@ -260,8 +260,8 @@ const AIPhotoFinder = ({
                   Verify password first
                 </div>
               ) : (
-                <div className="text-xs text-muted-foreground">
-                  Upload first
+                <div className="text-xs text-muted-foreground text-center">
+                  AI-powered search
                 </div>
               )}
             </Button>
@@ -269,21 +269,23 @@ const AIPhotoFinder = ({
             {/* Select All Button */}
             <Button
               variant="outline"
-              className="h-[90px] flex flex-col items-center justify-center gap-1.5 hover:border-primary/50 transition-colors"
+              className="h-[90px] flex flex-col items-center justify-center gap-1.5 hover:border-green-500/50 hover:bg-green-50 transition-colors"
               onClick={onSelectAll}
             >
-              <CheckCircle className="w-5 h-5" />
-              <div className="text-xs font-medium text-center">Select All</div>
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <div className="text-xs font-bold text-center text-green-600">Select All</div>
+              <div className="text-xs text-muted-foreground text-center">Choose all photos</div>
             </Button>
 
             {/* Clear Button */}
             <Button
               variant="outline"
-              className="h-[90px] flex flex-col items-center justify-center gap-1.5 hover:border-destructive/50 transition-colors"
+              className="h-[90px] flex flex-col items-center justify-center gap-1.5 hover:border-red-500/50 hover:bg-red-50 transition-colors"
               onClick={onClearAll}
             >
-              <XCircle className="w-5 h-5 hover:text-destructive" />
-              <div className="text-xs font-medium text-center">Clear All</div>
+              <XCircle className="w-5 h-5 text-red-600" />
+              <div className="text-xs font-bold text-center text-red-600">Clear All</div>
+              <div className="text-xs text-muted-foreground text-center">Remove selections</div>
             </Button>
           </div>
         </CardContent>

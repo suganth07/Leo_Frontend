@@ -1,31 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, X, Filter, SortAsc, SortDesc } from "lucide-react";
+import { Search, X, Filter, SortAsc, SortDesc, Calendar, Hash, Type } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DataProcessor, type SortOptions, type FilterOptions } from "@/lib/data-processor";
 
-interface SearchBarProps {
+interface AdminSearchBarProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   images: any[];
   onFilteredResults: (filteredImages: any[]) => void;
-  showConfidenceFilter?: boolean;
 }
 
-const SearchBar = ({ 
+const AdminSearchBar = ({ 
   searchTerm, 
   onSearchChange, 
   images, 
-  onFilteredResults,
-  showConfidenceFilter = false 
-}: SearchBarProps) => {
-  const [sortField, setSortField] = useState<'name' | 'confidence' | 'date'>('name');
+  onFilteredResults
+}: AdminSearchBarProps) => {
+  const [sortField, setSortField] = useState<'name' | 'date'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [minConfidence, setMinConfidence] = useState<number>(0);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Apply filters and sorting
@@ -34,29 +30,40 @@ const SearchBar = ({
 
     // Apply search filter
     if (searchTerm) {
-      processed = DataProcessor.filterImages(processed, {
-        searchTerm: searchTerm
-      });
-    }
-
-    // Apply confidence filter if enabled
-    if (showConfidenceFilter && minConfidence > 0) {
-      processed = DataProcessor.filterImages(processed, {
-        minConfidence: minConfidence
-      });
+      processed = processed.filter(image => 
+        image.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
     // Apply sorting
-    processed = DataProcessor.sortImages(processed, {
-      field: sortField,
-      direction: sortDirection
+    processed = processed.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortField) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'date':
+          // Assuming images have a date property or we can extract from name
+          aValue = a.name;
+          bValue = b.name;
+          break;
+        default:
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
     });
 
     onFilteredResults(processed);
   };
 
   // Handle sort change
-  const handleSortChange = (field: 'name' | 'confidence' | 'date') => {
+  const handleSortChange = (field: 'name' | 'date') => {
     if (field === sortField) {
       // Toggle direction if same field
       setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
@@ -69,7 +76,7 @@ const SearchBar = ({
   // Apply filters whenever dependencies change
   useEffect(() => {
     applyFiltersAndSort();
-  }, [searchTerm, sortField, sortDirection, minConfidence, images]);
+  }, [searchTerm, sortField, sortDirection, images]);
 
   return (
     <Card className="border border-border/60">
@@ -78,10 +85,10 @@ const SearchBar = ({
           <div>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5 text-primary" />
-              Search & Filter Photos
+              Search & Filter Images
             </CardTitle>
             <CardDescription>
-              Filter and sort photos with advanced options
+              Search and sort images with advanced options
             </CardDescription>
           </div>
           <Button
@@ -104,7 +111,7 @@ const SearchBar = ({
             type="text"
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search photos by name, date, or keywords..."
+            placeholder="Search images by name..."
             className="pl-9"
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -124,7 +131,7 @@ const SearchBar = ({
         {showAdvancedFilters && (
           <div className="space-y-4 pt-4 border-t">
             {/* Sort Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">Sort By</label>
                 <div className="flex gap-2">
@@ -134,6 +141,7 @@ const SearchBar = ({
                     onClick={() => handleSortChange('name')}
                     className="flex-1"
                   >
+                    <Type className="w-3 h-3 mr-1" />
                     Name
                     {sortField === 'name' && (
                       sortDirection === 'asc' ? 
@@ -147,6 +155,7 @@ const SearchBar = ({
                     onClick={() => handleSortChange('date')}
                     className="flex-1"
                   >
+                    <Calendar className="w-3 h-3 mr-1" />
                     Date
                     {sortField === 'date' && (
                       sortDirection === 'asc' ? 
@@ -154,86 +163,35 @@ const SearchBar = ({
                         <SortDesc className="w-3 h-3 ml-1" />
                     )}
                   </Button>
-                  {showConfidenceFilter && (
-                    <Button
-                      variant={sortField === 'confidence' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => handleSortChange('confidence')}
-                      className="flex-1"
-                    >
-                      Confidence
-                      {sortField === 'confidence' && (
-                        sortDirection === 'asc' ? 
-                          <SortAsc className="w-3 h-3 ml-1" /> : 
-                          <SortDesc className="w-3 h-3 ml-1" />
-                      )}
-                    </Button>
-                  )}
                 </div>
               </div>
 
-              {/* Confidence Filter */}
-              {showConfidenceFilter && (
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Min Confidence: {minConfidence}%
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="5"
-                    value={minConfidence}
-                    onChange={(e) => setMinConfidence(parseInt(e.target.value))}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>0%</span>
-                    <span>50%</span>
-                    <span>100%</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Quick Filters */}
+              {/* Quick Actions */}
               <div>
                 <label className="text-sm font-medium mb-2 block">Quick Actions</label>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      onSearchChange('');
-                      setMinConfidence(0);
-                      setSortField('name');
-                      setSortDirection('asc');
-                    }}
-                  >
-                    Reset
-                  </Button>
-                  {showConfidenceFilter && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setMinConfidence(80)}
-                    >
-                      High Confidence
-                    </Button>
-                  )}
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    onSearchChange('');
+                    setSortField('name');
+                    setSortDirection('asc');
+                  }}
+                  className="w-full"
+                >
+                  Reset All Filters
+                </Button>
               </div>
             </div>
 
             {/* Results Summary */}
             <div className="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t">
               <span>
-                Showing {images.length} result{images.length !== 1 ? 's' : ''}
+                Showing {images.length} image{images.length !== 1 ? 's' : ''}
               </span>
-              {showConfidenceFilter && minConfidence > 0 && (
-                <span>
-                  Filtered by {minConfidence}%+ confidence
-                </span>
-              )}
+              <span>
+                Sorted by {sortField} ({sortDirection === 'asc' ? 'ascending' : 'descending'})
+              </span>
             </div>
           </div>
         )}
@@ -242,4 +200,4 @@ const SearchBar = ({
   );
 };
 
-export default SearchBar;
+export default AdminSearchBar;

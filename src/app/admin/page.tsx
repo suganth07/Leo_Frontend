@@ -57,6 +57,7 @@ export default function AdminPage() {
   // Enhanced state variables for new functionality
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>("");
   const [displayImages, setDisplayImages] = useState<{ id: string; name: string; url: string }[]>([]);
+  const [currentFilteredImages, setCurrentFilteredImages] = useState<{ id: string; name: string; url: string }[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
@@ -206,9 +207,14 @@ export default function AdminPage() {
     : "";
 
   // Filter images based on search term
-  const filteredImages = displayImages.filter(image => 
+  const filteredImages = currentFilteredImages.length > 0 ? currentFilteredImages : displayImages.filter(image => 
     image.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Handle filtered results from SearchBar
+  const handleFilteredResults = (filtered: any[]) => {
+    setCurrentFilteredImages(filtered);
+  };
 
   function getGoogleDriveViewUrl(fileId: string) {
     return `https://drive.google.com/uc?export=view&id=${fileId}`;
@@ -783,6 +789,7 @@ export default function AdminPage() {
               setDisplayImages={setDisplayImages}
               isLoadingImages={isLoadingImages}
               loadingProgress={progress}
+              onFilteredResults={handleFilteredResults}
             />
           )}
           

@@ -29,60 +29,64 @@ export default function ConfirmationDialogs({
     <>
       {/* Confirmation Dialog for Encoding Replace */}
       {showConfirmation && (
-        <Card className="border-destructive/50 bg-destructive/5 mb-6">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <p className="text-lg font-medium">Existing encoding found. Replace it?</p>
-              <div className="flex gap-3 justify-center">
-                <Button
-                  variant="destructive"
-                  onClick={handleConfirmYes}
-                  disabled={isCreatingEncoding}
-                >
-                  {isCreatingEncoding ? "Replacing..." : "Yes, Replace"}
-                </Button>
-                <Button variant="outline" onClick={handleConfirmNo}>
-                  Cancel
-                </Button>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="border-destructive/50 bg-destructive/5 max-w-md w-full">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <p className="text-lg font-medium">Existing encoding found. Replace it?</p>
+                <div className="flex gap-3 justify-center">
+                  <Button
+                    variant="destructive"
+                    onClick={handleConfirmYes}
+                    disabled={isCreatingEncoding}
+                  >
+                    {isCreatingEncoding ? "Replacing..." : "Yes, Replace"}
+                  </Button>
+                  <Button variant="outline" onClick={handleConfirmNo}>
+                    Cancel
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirmation && (
-        <Card className="border-destructive/50 bg-destructive/5 mb-6">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <div className="flex items-center justify-center mb-4">
-                <div className="p-3 bg-destructive/20 rounded-full">
-                  <Trash2 className="h-6 w-6 text-destructive" />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="border-destructive/50 bg-destructive/5 max-w-md w-full">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="p-3 bg-destructive/20 rounded-full">
+                    <Trash2 className="h-6 w-6 text-destructive" />
+                  </div>
+                </div>
+                <p className="text-lg font-medium">Delete Encoding?</p>
+                <p className="text-sm text-muted-foreground">
+                  This will permanently remove the AI facial recognition data for this portfolio. This action cannot be undone.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <Button
+                    variant="destructive"
+                    onClick={confirmDeleteEncoding}
+                    disabled={deleteLoading}
+                  >
+                    {deleteLoading ? "Deleting..." : "Yes, Delete"}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowDeleteConfirmation(false)}
+                    disabled={deleteLoading}
+                  >
+                    Cancel
+                  </Button>
                 </div>
               </div>
-              <p className="text-lg font-medium">Delete Encoding?</p>
-              <p className="text-sm text-muted-foreground">
-                This will permanently remove the AI facial recognition data for this portfolio. This action cannot be undone.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Button
-                  variant="destructive"
-                  onClick={confirmDeleteEncoding}
-                  disabled={deleteLoading}
-                >
-                  {deleteLoading ? "Deleting..." : "Yes, Delete"}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowDeleteConfirmation(false)}
-                  disabled={deleteLoading}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </>
   );
