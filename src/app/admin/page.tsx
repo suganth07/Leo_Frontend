@@ -7,7 +7,6 @@ import Navbar from "@/components/ui/navbar";
 import { Toaster } from "sonner";
 import { toast } from "sonner";
 import { createClient } from "@supabase/supabase-js";
-import axios from "axios";
 
 // Component imports
 import AdminHeader from "./components/AdminHeader";
