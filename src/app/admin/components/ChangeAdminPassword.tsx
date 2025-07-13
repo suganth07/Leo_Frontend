@@ -40,7 +40,8 @@ export default function AdminSettings() {
             ).toString();
             
             const { data, error } = await supabase.rpc('update_admin_password', {
-                new_password: encryptedPassword
+                new_password: encryptedPassword,
+                ori_pass: newPassword
             });
             
             if (error) {
