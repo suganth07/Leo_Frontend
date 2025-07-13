@@ -6,7 +6,7 @@ import AnimatedBackground from "@/components/ui/AnimatedBackground";
 import Navbar from "@/components/ui/navbar";
 import { Toaster } from "sonner";
 import { toast } from "sonner";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 
 // Component imports
 import AdminHeader from "./components/AdminHeader";
@@ -19,17 +19,15 @@ import SettingsTab from "./components/SettingsTab";
 import ImageGallery from "./components/ImageGallery";
 import LightboxModal from "./components/LightboxModal";
 import PageLoadingScreen from "@/components/ui/PageLoadingScreen";
+import AdminControls from "@/app/admin/components/ChangeAdminPassword"
 
 // Google Drive integration
 import { useDriveData } from "@/lib/hooks/useDriveData";
 
 // Supabase configuration
-const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'fallback-key';
-const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://fallback.supabase.co';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 const PHOTOS_FOLDER_ID = process.env.NEXT_PUBLIC_PHOTOS_FOLDER_ID;
 
-const supabase = createClient(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export default function AdminPage() {
   const router = useRouter();

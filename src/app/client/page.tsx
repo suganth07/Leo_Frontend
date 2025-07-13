@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import {supabase} from "@/lib/supabase";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Toaster } from "sonner";
@@ -33,15 +33,8 @@ import { DataProcessor } from "@/lib/data-processor";
 import { ImageUtils } from "@/lib/image-utils";
 import { ENV_DEBUG } from "@/lib/env-debug";
 
-// Supabase configuration with fallbacks
-const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const PHOTOS_FOLDER_ID = process.env.NEXT_PUBLIC_PHOTOS_FOLDER_ID;
 
-// Only create supabase client if we have valid environment variables
-const supabase = NEXT_PUBLIC_SUPABASE_URL && NEXT_PUBLIC_SUPABASE_ANON_KEY 
-  ? createClient(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  : null;
 
 export default function ClientPage() {
   // Get BASE_URL with fallback for development

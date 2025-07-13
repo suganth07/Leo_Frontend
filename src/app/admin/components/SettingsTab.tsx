@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { QRCodeCanvas } from "qrcode.react";
 import { Settings, QrCode, Shield, Download, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import AdminControls from "@/app/admin/components/ChangeAdminPassword"
 
 interface SettingsTabProps {
   selectedPortfolioId: string;
@@ -50,6 +51,11 @@ export default function SettingsTab({
       a.click();
     }
   };
+if(!selectedPortfolioId) {
+  return(
+    
+      <AdminControls/>
+  )}
 if(selectedPortfolioId){
 
   return (
@@ -196,6 +202,7 @@ if(selectedPortfolioId){
             )}
           </CardContent>
         </Card>
+          <AdminControls/>
       </div>
     </div>
   );

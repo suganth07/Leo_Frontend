@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { Camera, Settings, Eye, EyeOff, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -22,8 +22,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import ThemeToggle from "@/components/ui/ThemeToggle"
 import { toast } from "sonner"
-
-const ADMIN_PASSWORD = "admin123" // In production, this should be handled more securely
+import {supabase} from "@/lib/supabase";
+import CryptoJS from 'crypto-js'; // Add this import
 
 export default function Navbar() {
   const router = useRouter()
@@ -32,8 +32,25 @@ export default function Navbar() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-
+  const [adminPassword, setAdminPassword] = useState<string | null>(null)
+  
   const isOnAdminPage = pathname === '/admin'
+  
+  // Move the data fetching inside useEffect
+  useEffect(() => {
+    async function fetchAdminPassword() {
+      const { data, error } = await supabase
+        .from("admin_controls")
+        .select("password")
+        .single();
+      
+      if (data?.password) {
+        setAdminPassword(data.password);
+      }
+    }
+    
+    fetchAdminPassword();
+  }, [])
 
   const handleAdminAccess = () => {
     setShowPasswordDialog(true)
@@ -46,17 +63,47 @@ export default function Navbar() {
     // Simulate loading
     await new Promise(resolve => setTimeout(resolve, 500))
 
-    if (password === ADMIN_PASSWORD) {
-      // Set authentication state
-      setShowPasswordDialog(false)
-      setPassword("")
-      setTimeout(() => {
-        router.push("/admin")
-      }, 1000)
-      sessionStorage.setItem('isAuthenticated', 'true')
-      toast.success("Access granted! Redirecting to admin panel...")
-    } else {
-      toast.error("Incorrect password. Please try again.")
+    try {
+      if (!adminPassword) {
+        toast.error("Admin password not configured");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Try to decrypt the stored password
+      const decryptedBytes = CryptoJS.AES.decrypt(
+        adminPassword,
+        process.env.NEXT_PUBLIC_PASSWORD_ENCRYPTION_KEY || 'default-encryption-key'
+      );
+      
+      const decryptedPassword = decryptedBytes.toString(CryptoJS.enc.Utf8);
+      
+      // Check if password matches
+      if (password === decryptedPassword) {
+        setShowPasswordDialog(false)
+        setPassword("")
+        setTimeout(() => {
+          router.push("/admin")
+        }, 1000)
+        sessionStorage.setItem('isAuthenticated', 'true')
+        toast.success("Access granted! Redirecting to admin panel...")
+      } else {
+        toast.error("Incorrect password. Please try again.")
+      }
+    } catch (error) {
+      // If decryption fails (for old passwords or invalid data)
+      // Fall back to direct comparison (for backward compatibility)
+      if (password === adminPassword) {
+        setShowPasswordDialog(false)
+        setPassword("")
+        setTimeout(() => {
+          router.push("/admin")
+        }, 1000)
+        sessionStorage.setItem('isAuthenticated', 'true')
+        toast.success("Access granted! Redirecting to admin panel...")
+      } else {
+        toast.error("Incorrect password. Please try again.")
+      }
     }
     
     setIsLoading(false)
