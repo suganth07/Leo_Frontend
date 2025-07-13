@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/prebuild.js && next build",
+    "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "prebuild": "node scripts/prebuild.js"
+    "lint": "next lint"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.2",
