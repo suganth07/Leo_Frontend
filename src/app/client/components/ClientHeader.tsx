@@ -12,12 +12,10 @@ const ClientHeader = () => {
       className="text-center space-y-2 mb-8"
     >
       <div className="flex items-center justify-center gap-2 mb-4">
-        <FolderOpen className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold">Photo Gallery</h1>
+        {/* <FolderOpen className="h-8 w-8 text-primary" /> */}
+        <img src="/logo.png" alt="Leo Logo" className="h-15 w-15 color-white" />
+        <h1 className="text-3xl font-bold">Leo Photo Gallery - Client Portal</h1>
       </div>
-      <p className="text-muted-foreground text-lg">
-        Find and download your photos using AI-powered face recognition
-      </p>
     </motion.div>
   );
 };

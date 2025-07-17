@@ -492,7 +492,7 @@ export default function ClientPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300 relative overflow-x-hidden">
+    <div className="min-h-screen bg-background transition-colors duration-300 relative overflow-y-hidden">
       <AnimatedBackground />
       <Toaster position="top-center" />
       
@@ -517,7 +517,7 @@ export default function ClientPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="grid lg:grid-cols-1 gap-6"
+              className="grid lg:grid-cols-1 gap-2"
             >
               {/* Portfolio Selection Card */}
               <PortfolioSelection 

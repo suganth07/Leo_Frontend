@@ -193,10 +193,24 @@
   body {
     @apply bg-background text-foreground;
     font-size: var(--base-font-size);
+    /* Hide scrollbar */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
 
   html {
     font-size: var(--base-font-size);
+    /* Hide scrollbar */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
 }
 
@@ -251,4 +265,5 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
+
 }

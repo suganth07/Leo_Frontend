@@ -164,7 +164,7 @@ export default function PortfolioSelection({
                           />
                         </div>
                       </div>
-                      <div className="max-h-48 overflow-auto">
+                      <div className="max-h-48 overflow-auto scrollbar-hide">
                         {filteredFolders.length > 0 ? (
                           filteredFolders.map((folder) => (
                             <div
